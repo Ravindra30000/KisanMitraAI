@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #005129;
+  --color-primary-container: #1a6b3c;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #9ae9ae;
+
+  --color-secondary: #006d39;
+  --color-secondary-container: #97f3b1;
+  --color-on-secondary-container: #06723d;
+
+  --color-tertiary: #643e00;
+  --color-tertiary-container: #845300;
+  --color-on-tertiary-container: #ffcf97;
+
+  --color-background: #fbf9f3;
+  --color-surface-lowest: #ffffff;
+  --color-surface-low: #f5f3ed;
+  --color-surface-container: #f0eee8;
+  --color-surface-container-high: #eae8e2;
+  --color-on-surface: #1b1c18;
+  --color-on-surface-variant: #404940;
+  --color-outline: #707a70;
+  --color-outline-variant: #bfc9be;
+
+  --color-accent-gold: #e8960a;
+  --color-sky-blue: #4a90d9;
+  --color-alert-red: #d63b3b;
+  --color-green-tint-bg: #edf7f1;
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+  --spacing-stack-sm: 8px;
+  --spacing-stack-md: 16px;
+  --spacing-stack-lg: 24px;
+  --spacing-bottom-nav: 68px;
+  --spacing-bottom-safe: 80px;
+
+  --shadow-soft: 0px 2px 12px rgba(0, 0, 0, 0.07);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-outline);
+}
+
+/* Pulsing voice recording waveforms */
+@keyframes voice-wave {
+  0%, 100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.wave-bar {
+  animation: voice-wave 1s ease-in-out infinite;
+}
+
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { animation-delay: 0.4s; }
+.wave-bar:nth-child(6) { animation-delay: 0.5s; }
+.wave-bar:nth-child(7) { animation-delay: 0.6s; }
+.wave-bar:nth-child(8) { animation-delay: 0.7s; }
+.wave-bar:nth-child(9) { animation-delay: 0.8s; }
+.wave-bar:nth-child(10) { animation-delay: 0.9s; }

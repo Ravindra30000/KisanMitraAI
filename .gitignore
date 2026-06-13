@@ -1,0 +1,44 @@
+# Dependency folders
+node_modules/
+venv/
+env/
+ENV/
+
+# Local database and cache
+chroma_db/
+__pycache__/
+*.pyc
+.cache/
+.pytest_cache/
+.ipynb_checkpoints/
+.expo/
+
+# Build folder
+dist/
+build/
+out/
+
+# Environment configurations
+.env
+.env.local
+.env.*.local
+
+# IDE configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Excluded assets/files per user requirements
+stitch screns -code and png/
+AGENT.md
+KisanMitra_PRD_TDD.md
+kisanmitra_pr/
+
+# Logs and system files
+logs/
+*.log
+.DS_Store

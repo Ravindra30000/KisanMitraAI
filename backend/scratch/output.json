@@ -1,0 +1,69 @@
+{
+  "prices": [
+    {
+      "commodityId": "wheat",
+      "mandi": "Bhopal",
+      "state": "Madhya Pradesh",
+      "price": 2380,
+      "change": -15,
+      "date": "today"
+    },
+    {
+      "commodityId": "onion",
+      "mandi": "Sehore",
+      "state": "Madhya Pradesh",
+      "price": 1950,
+      "change": 40,
+      "date": "today"
+    },
+    {
+      "commodityId": "tomato",
+      "mandi": "Raisen",
+      "state": "Madhya Pradesh",
+      "price": 1620,
+      "change": 25,
+      "date": "today"
+    },
+    {
+      "commodityId": "potato",
+      "mandi": "Bhopal",
+      "state": "Madhya Pradesh",
+      "price": 1280,
+      "change": -10,
+      "date": "today"
+    },
+    {
+      "commodityId": "paddy",
+      "mandi": "Sehore",
+      "state": "Madhya Pradesh",
+      "price": 2100,
+      "change": 10,
+      "date": "today"
+    },
+    {
+      "commodityId": "cotton",
+      "mandi": "Raisen",
+      "state": "Madhya Pradesh",
+      "price": 7350,
+      "change": 70,
+      "date": "today"
+    },
+    {
+      "commodityId": "corn",
+      "mandi": "Bhopal",
+      "state": "Madhya Pradesh",
+      "price": 1980,
+      "change": 30,
+      "date": "today"
+    },
+    {
+      "commodityId": "sugarcane",
+      "mandi": "Sehore",
+      "state": "Madhya Pradesh",
+      "price": 390,
+      "change": 0,
+      "date": "today"
+    }
+  ],
+  "advisory": "किसान भाइयों, जून का महीना खरीफ की बुवाई का समय है। गेहूं और आलू के दाम स्थिर हैं, यदि आपके पास पुराना स्टॉक है तो बाजार की स्थिति देखकर बेचने का विचार करें। प्याज, टमाटर और मक्का के दामों में हल्की तेजी दिख रही है। कपास और धान के लिए बुवाई की तैयारी करें। गन्ने के दाम स्थिर बने हुए हैं।"
+}

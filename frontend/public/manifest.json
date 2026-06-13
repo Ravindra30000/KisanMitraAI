@@ -1,0 +1,17 @@
+{
+  "name": "KisanMitra AI",
+  "short_name": "KisanMitra",
+  "description": "Aapka Digital Kheti Saathi - Voice-first farming assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBF9F3",
+  "theme_color": "#005129",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
