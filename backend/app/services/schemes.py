@@ -928,7 +928,7 @@ Rules:
 2. Explicitly reference their land size ({farmer_land} acres) and state ({farmer_state}).
 3. Identify 2 specific schemes from the list above that they are highly eligible for based on their profile.
 4. Keep the answer brief, warm, conversational and perfect for voice synthesis.
-5. Absolute limit: Under 120 words.
+5. Aim for 150-200 words. Be complete and specific — name at least 2 schemes with their key benefit and eligibility detail.
 6. Do not use markdown styling (*, #, _, -) or numbers/bullet points. Write in flowing paragraphs.
 7. Return ONLY the translation in the requested language: {lang} (if "hl", write in Hinglish - Hindi written in English letters).
 """

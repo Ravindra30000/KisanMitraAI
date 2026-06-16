@@ -265,21 +265,21 @@ const Disease: React.FC = () => {
 
       {/* ── Hidden HTML5 File Inputs with Native Listener Refs ─────────────── */}
       <input
-        id="native-camera-input"
         ref={cameraInputRef}
         type="file"
         accept="image/*"
         capture="environment"
-        className="absolute w-0 h-0 opacity-0 pointer-events-none"
+        className="absolute w-px h-px opacity-0 pointer-events-none overflow-hidden"
         tabIndex={-1}
+        aria-hidden="true"
       />
       <input
-        id="gallery-input"
         ref={galleryInputRef}
         type="file"
         accept="image/*"
-        className="absolute w-0 h-0 opacity-0 pointer-events-none"
+        className="absolute w-px h-px opacity-0 pointer-events-none overflow-hidden"
         tabIndex={-1}
+        aria-hidden="true"
       />
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
@@ -376,28 +376,32 @@ const Disease: React.FC = () => {
           <div className="flex flex-col gap-3.5 w-full max-w-[340px]">
 
             {/* ── Primary: Native Camera Button ── */}
-            <label
-              htmlFor="native-camera-input"
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={isScanning}
               className={`w-full h-[52px] bg-[#005129] hover:bg-[#1a6b3c] active:scale-[0.98] ${
-                isScanning ? 'opacity-50 pointer-events-none' : 'cursor-pointer'
+                isScanning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
               } text-white rounded-[14px] font-bold flex items-center justify-center gap-2.5 transition-all shadow-md text-[15px]`}
             >
               <Camera size={20} />
               {lang === 'hi' || lang === 'hl'
                 ? 'कैमरा से फोटो लें 📸'
                 : 'Take Photo with Camera 📸'}
-            </label>
+            </button>
 
             {/* ── Secondary: Gallery Button ── */}
-            <label
-              htmlFor="gallery-input"
+            <button
+              type="button"
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={isScanning}
               className={`w-full h-[48px] border-2 border-[#005129] bg-white hover:bg-[#f0faf4] active:scale-[0.98] ${
-                isScanning ? 'opacity-50 pointer-events-none' : 'cursor-pointer'
+                isScanning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
               } text-[#005129] rounded-[14px] font-bold flex items-center justify-center gap-2.5 transition-all text-[14px]`}
             >
               <Upload size={17} />
               {lang === 'hi' || lang === 'hl' ? 'गैलरी से चुनें' : 'Choose from Gallery'}
-            </label>
+            </button>
 
             {/* Info Tip */}
             <p className="text-[11px] text-gray-400 text-center leading-relaxed">

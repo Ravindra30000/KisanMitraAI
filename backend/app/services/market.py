@@ -191,7 +191,7 @@ async def _gemini_mandi_prices(state: str, district: str, lang: str) -> Optional
         "potato 900-1800, paddy 1800-2600, cotton 5500-8500, corn 1600-2300, sugarcane 300-420\n"
         "- change: integer price difference from yesterday (can be negative, zero, or positive)\n"
         "- date: the string today or yesterday\n"
-        f"- advisory: 2-3 sentences in {_lang_name(lang)} advising the farmer what to sell or hold\n"
+        f"- advisory: 3-5 sentences of detailed market advice in {_lang_name(lang)}, explaining what to sell now, what to hold, and why based on current season and prices\n"
         f"- Adjust prices to reflect {season} seasonal supply and demand\n"
         "- mandi names must be written in English only"
     )
