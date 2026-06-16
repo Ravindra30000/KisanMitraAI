@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Sparkles, User, AlertCircle } from 'lucide-react';
 import VoiceOrb, { type OrbState } from '../../components/VoiceOrb';
 import { useLanguage } from '../../utils/i18n';
+import { getApiBase } from '../../utils/apiBase';
 
 interface Message {
   id: string;
@@ -11,7 +12,7 @@ interface Message {
   isVoice?: boolean;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = getApiBase();
 
 const Voice: React.FC = () => {
   const navigate = useNavigate();

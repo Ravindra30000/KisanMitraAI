@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Bell, MapPin, Sun, Calendar, ShieldAlert, TrendingUp, Camera, Mic, Plus, ArrowRight, User, CloudRain, Cloud, Sprout } from 'lucide-react';
 import { useLanguage } from '../../utils/i18n';
+import { getApiBase } from '../../utils/apiBase';
+
+const API_BASE_URL = getApiBase();
 
 interface Profile {
   name: string;
@@ -37,7 +40,6 @@ const Home: React.FC = () => {
     wind_speed: 12
   });
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
   const [locating, setLocating] = useState(false);
 
   const fetchHomeWeather = async (lat: number, lon: number) => {

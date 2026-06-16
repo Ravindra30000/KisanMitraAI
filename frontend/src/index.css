@@ -94,3 +94,10 @@
 .wave-bar:nth-child(8) { animation-delay: 0.7s; }
 .wave-bar:nth-child(9) { animation-delay: 0.8s; }
 .wave-bar:nth-child(10) { animation-delay: 0.9s; }
+
+/* Disease-page scanning progress bar */
+@keyframes scan-bar {
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(200%); }
+  100% { transform: translateX(-100%); }
+}

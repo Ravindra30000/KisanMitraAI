@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Trash2, User, MapPin, Sprout, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../utils/i18n';
+import { getApiBase } from '../../utils/apiBase';
+
+const API_BASE_URL = getApiBase();
 
 interface ProfileData {
   name: string;
@@ -52,7 +55,7 @@ const Profile: React.FC = () => {
 
   const [isSaved, setIsSaved] = useState(false);
   const [locating, setLocating] = useState(false);
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
 
   const handleProfileUseGPS = () => {
     if (!navigator.geolocation) {

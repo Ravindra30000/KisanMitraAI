@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Bell, AlertTriangle, CloudRain, Trash2, Sprout, TrendingUp, ArrowRight, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { useLanguage } from '../../utils/i18n';
+import { getApiBase } from '../../utils/apiBase';
+
+const API_BASE_URL = getApiBase();
 
 interface KMNotification {
   id: string;
@@ -32,7 +35,7 @@ const Notifications: React.FC = () => {
     scheme: true
   });
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
 
   // Multi-lingual UI Strings
   const localUIDict: Record<string, Record<string, string>> = {

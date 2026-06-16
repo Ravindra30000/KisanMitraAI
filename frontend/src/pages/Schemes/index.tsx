@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Volume2, ExternalLink, Sparkles, MapPin } from 'lucide-react';
 import { useLanguage } from '../../utils/i18n';
+import { getApiBase } from '../../utils/apiBase';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = getApiBase();
 
 interface Scheme {
   id: string;

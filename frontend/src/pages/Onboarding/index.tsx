@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Search, Mic, MapPin, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../../utils/i18n';
+import { getApiBase } from '../../utils/apiBase';
+
+const API_BASE_URL = getApiBase();
 
 type Step = 1 | 2 | 3;
 
@@ -42,7 +45,6 @@ const Onboarding: React.FC = () => {
   const [step, setStep] = useState<Step>(1);
   const { t } = useLanguage();
   const [locating, setLocating] = useState(false);
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
   
   const [formData, setFormData] = useState<OnboardingData>({
     language: 'hi',
