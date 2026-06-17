@@ -42,12 +42,25 @@ const Disease: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [errorMsg, setErrorMsg]           = useState<string | null>(null);
   const [diagnosis, setDiagnosis]         = useState<DiagnosisResult | null>(null);
-  const [debugLogs, setDebugLogs]         = useState<string[]>([]);
-  const [showDebug, setShowDebug]         = useState(false);
+  const STORAGE_KEY = 'km_debug_logs';
+  const [debugLogs, setDebugLogs] = useState<string[]>(() => {
+    try { return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+  });
+  const [showDebug, setShowDebug] = useState(false);
 
   const addLog = (msg: string) => {
+    const entry = `[${new Date().toLocaleTimeString()}] ${msg}`;
     console.log('[KisanMitra]', msg);
-    setDebugLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+    setDebugLogs((prev) => {
+      const next = [...prev, entry];
+      try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
+  const clearLogs = () => {
+    setDebugLogs([]);
+    try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
   };
 
   // Detect when user returns from camera app — fires even if file delivery failed
@@ -387,12 +400,22 @@ const Disease: React.FC = () => {
 
       {/* ── Debug Console ───────────────────────────────────────────────────── */}
       <div className="mx-auto w-full max-w-[340px] px-5 mt-4">
-        <button
-          onClick={() => setShowDebug(!showDebug)}
-          className="w-full py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 font-bold rounded-lg text-[12px] transition-colors"
-        >
-          {showDebug ? '🛠️ Hide Debug Logs' : '🛠️ Show Debug Logs'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowDebug(!showDebug)}
+            className="flex-1 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 font-bold rounded-lg text-[12px] transition-colors"
+          >
+            {showDebug ? '🛠️ Hide Debug Logs' : '🛠️ Show Debug Logs'}
+          </button>
+          {showDebug && (
+            <button
+              onClick={clearLogs}
+              className="px-3 py-2 bg-red-100 text-red-600 hover:bg-red-200 font-bold rounded-lg text-[12px] transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
         {showDebug && (
           <div className="mt-2 p-3 bg-gray-900 text-green-400 font-mono text-[10px] rounded-lg h-[200px] overflow-y-auto border border-gray-700">
             {debugLogs.length === 0 ? (
