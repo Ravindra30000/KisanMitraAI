@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, Upload, AlertCircle, X, ZoomIn } from 'lucide-react';
 import { useLanguage } from '../../utils/i18n';
@@ -55,91 +55,27 @@ const Disease: React.FC = () => {
   };
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Native Event Binding for DOM inputs
+  // Shared file handler — called by React onChange on both inputs
   // ─────────────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    addLog("Disease page mounted. Initializing native listeners...");
-
-    const camInput = cameraInputRef.current;
-    const galInput = galleryInputRef.current;
-
-    const handleCamChange = (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      addLog(`Camera change event. Files detected: ${target.files?.length}`);
-      const file = target.files?.[0];
-      if (file) {
-        addLog(`File received: ${file.name} (size: ${(file.size / 1024).toFixed(1)} KB), type: ${file.type}`);
-        
-        // Show local preview immediately
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          addLog("FileReader successfully converted file to data URL preview.");
-          setSelectedImage(ev.target?.result as string);
-        };
-        reader.onerror = (err) => {
-          addLog(`FileReader error: ${err}`);
-        };
-        reader.readAsDataURL(file);
-
-        // Compress and upload
-        compressAndDiagnose(file);
-      } else {
-        addLog("Change event fired but no file was returned.");
-      }
-    };
-
-    const handleGalChange = (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      addLog(`Gallery change event. Files detected: ${target.files?.length}`);
-      const file = target.files?.[0];
-      if (file) {
-        addLog(`File received: ${file.name} (size: ${(file.size / 1024).toFixed(1)} KB), type: ${file.type}`);
-        
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          addLog("FileReader successfully converted file to data URL preview.");
-          setSelectedImage(ev.target?.result as string);
-        };
-        reader.onerror = (err) => {
-          addLog(`FileReader error: ${err}`);
-        };
-        reader.readAsDataURL(file);
-
-        compressAndDiagnose(file);
-      } else {
-        addLog("Change event fired but no file was returned.");
-      }
-    };
-
-    const handleInputClick = (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      addLog(`Input clicked. Resetting value to empty string to ensure change event fires...`);
-      target.value = "";
-    };
-
-    if (camInput) {
-      camInput.addEventListener('change', handleCamChange);
-      camInput.addEventListener('click', handleInputClick);
-      addLog("Attached listeners to camera input.");
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, source: 'camera' | 'gallery') => {
+    const file = e.target.files?.[0];
+    addLog(`${source} onChange fired. Files: ${e.target.files?.length ?? 0}`);
+    if (file) {
+      addLog(`File: ${file.name} (${(file.size / 1024).toFixed(1)} KB) type: ${file.type}`);
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        addLog('FileReader preview ready.');
+        setSelectedImage(ev.target?.result as string);
+      };
+      reader.onerror = () => addLog('FileReader error on preview.');
+      reader.readAsDataURL(file);
+      compressAndDiagnose(file);
+    } else {
+      addLog('onChange fired but no file returned.');
     }
-    if (galInput) {
-      galInput.addEventListener('change', handleGalChange);
-      galInput.addEventListener('click', handleInputClick);
-      addLog("Attached listeners to gallery input.");
-    }
-
-    return () => {
-      addLog("Removing native listeners on unmount...");
-      if (camInput) {
-        camInput.removeEventListener('change', handleCamChange);
-        camInput.removeEventListener('click', handleInputClick);
-      }
-      if (galInput) {
-        galInput.removeEventListener('change', handleGalChange);
-        galInput.removeEventListener('click', handleInputClick);
-      }
-    };
-  }, []);
+    // Reset so selecting the same file again still fires onChange
+    e.target.value = '';
+  };
 
   // ─────────────────────────────────────────────────────────────────────────
   // Image compression → backend diagnosis
@@ -263,13 +199,14 @@ const Disease: React.FC = () => {
   return (
     <div className="flex flex-col bg-[#fbf9f3] min-h-screen pb-[120px] font-sans text-[#1b1c18]">
 
-      {/* ── Hidden HTML5 File Inputs with Native Listener Refs ─────────────── */}
+      {/* ── Hidden HTML5 File Inputs ───────────────────────────────────────── */}
       <input
         ref={cameraInputRef}
         type="file"
         accept="image/*"
         capture="environment"
-        className="absolute w-px h-px opacity-0 pointer-events-none overflow-hidden"
+        onChange={(e) => handleFileChange(e, 'camera')}
+        className="absolute w-px h-px opacity-0 overflow-hidden"
         tabIndex={-1}
         aria-hidden="true"
       />
@@ -277,7 +214,8 @@ const Disease: React.FC = () => {
         ref={galleryInputRef}
         type="file"
         accept="image/*"
-        className="absolute w-px h-px opacity-0 pointer-events-none overflow-hidden"
+        onChange={(e) => handleFileChange(e, 'gallery')}
+        className="absolute w-px h-px opacity-0 overflow-hidden"
         tabIndex={-1}
         aria-hidden="true"
       />
@@ -378,7 +316,13 @@ const Disease: React.FC = () => {
             {/* ── Primary: Native Camera Button ── */}
             <button
               type="button"
-              onClick={() => cameraInputRef.current?.click()}
+              onClick={() => {
+                addLog('Camera button tapped.');
+                if (cameraInputRef.current) {
+                  cameraInputRef.current.value = '';
+                  cameraInputRef.current.click();
+                }
+              }}
               disabled={isScanning}
               className={`w-full h-[52px] bg-[#005129] hover:bg-[#1a6b3c] active:scale-[0.98] ${
                 isScanning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
@@ -393,7 +337,13 @@ const Disease: React.FC = () => {
             {/* ── Secondary: Gallery Button ── */}
             <button
               type="button"
-              onClick={() => galleryInputRef.current?.click()}
+              onClick={() => {
+                addLog('Gallery button tapped.');
+                if (galleryInputRef.current) {
+                  galleryInputRef.current.value = '';
+                  galleryInputRef.current.click();
+                }
+              }}
               disabled={isScanning}
               className={`w-full h-[48px] border-2 border-[#005129] bg-white hover:bg-[#f0faf4] active:scale-[0.98] ${
                 isScanning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
