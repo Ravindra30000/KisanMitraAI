@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, Upload, AlertCircle, X, ZoomIn } from 'lucide-react';
 import { useLanguage } from '../../utils/i18n';
@@ -34,6 +34,9 @@ const Disease: React.FC = () => {
   const navigate = useNavigate();
   const { t, lang } = useLanguage();
 
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
   const [isScanning, setIsScanning]       = useState(false);
   const [showResult, setShowResult]       = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -47,35 +50,49 @@ const Disease: React.FC = () => {
     setDebugLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
   };
 
+  // Detect when user returns from camera app — fires even if file delivery failed
+  useEffect(() => {
+    const onFocus = () => addLog('▶ Window regained focus (returned from camera/gallery)');
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        addLog(`▶ Page visible again. visibilityState=${document.visibilityState}`);
+      }
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+
   const logEnvironment = () => {
-    addLog(`UA: ${navigator.userAgent.slice(0, 80)}`);
-    addLog(`Online: ${navigator.onLine}`);
-    addLog(`API base: ${API_BASE_URL}`);
+    addLog(`UA: ${navigator.userAgent.slice(0, 100)}`);
+    addLog(`API: ${API_BASE_URL} | online: ${navigator.onLine}`);
     if ('permissions' in navigator) {
       (navigator.permissions.query({ name: 'camera' as PermissionName }))
         .then((p) => addLog(`Camera permission: ${p.state}`))
-        .catch((e) => addLog(`Permission query failed: ${e}`));
-    } else {
-      addLog('Permissions API not available on this browser');
+        .catch((e) => addLog(`Permission query error: ${e}`));
     }
   };
 
   // ── Shared file change handler ──────────────────────────────────────────────
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, source: 'camera' | 'gallery') => {
+    const fileCount = e.target.files?.length ?? 0;
+    addLog(`✅ ${source} onChange fired! files.length=${fileCount}`);
     const file = e.target.files?.[0];
-    addLog(`${source} onChange fired. files.length=${e.target.files?.length ?? 0}`);
     if (file) {
-      addLog(`File received: "${file.name}" size=${(file.size / 1024).toFixed(1)}KB type=${file.type}`);
+      addLog(`File: "${file.name}" size=${(file.size / 1024).toFixed(1)}KB type=${file.type || 'unknown'}`);
       const reader = new FileReader();
       reader.onload = (ev) => {
-        addLog('FileReader preview ready — showing image.');
+        addLog('Preview image ready — displaying in viewfinder.');
         setSelectedImage(ev.target?.result as string);
       };
-      reader.onerror = () => addLog('FileReader ERROR on preview read.');
+      reader.onerror = () => addLog('❌ FileReader error while loading preview.');
       reader.readAsDataURL(file);
       compressAndDiagnose(file);
     } else {
-      addLog('onChange fired but files list is empty — user may have cancelled.');
+      addLog('⚠ onChange fired but file list is empty — user cancelled or low memory lost the file.');
     }
     e.target.value = '';
   };
@@ -99,14 +116,14 @@ const Disease: React.FC = () => {
       let h = img.height;
       if (w > h) { if (w > MAX) { h = Math.round((h * MAX) / w); w = MAX; } }
       else        { if (h > MAX) { w = Math.round((w * MAX) / h); h = MAX; } }
-      addLog(`Canvas resize: ${img.width}x${img.height} → ${w}x${h}`);
+      addLog(`Canvas: ${img.width}x${img.height} → ${w}x${h}`);
 
       const canvas = document.createElement('canvas');
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        addLog('No 2D context — uploading original.');
+        addLog('No canvas 2D context — uploading original.');
         return uploadForDiagnosis(file);
       }
       ctx.drawImage(img, 0, 0, w, h);
@@ -116,7 +133,7 @@ const Disease: React.FC = () => {
             addLog(`Compressed to ${(blob.size / 1024).toFixed(1)}KB`);
             uploadForDiagnosis(new File([blob], file.name || 'crop.jpg', { type: 'image/jpeg', lastModified: Date.now() }));
           } else {
-            addLog('toBlob returned null — uploading original.');
+            addLog('toBlob=null — uploading original.');
             uploadForDiagnosis(file);
           }
         },
@@ -126,7 +143,7 @@ const Disease: React.FC = () => {
     };
 
     img.onerror = (err) => {
-      addLog(`Image load error in canvas: ${err} — uploading original.`);
+      addLog(`Image load error: ${err} — uploading original.`);
       URL.revokeObjectURL(objectUrl);
       uploadForDiagnosis(file);
     };
@@ -134,7 +151,7 @@ const Disease: React.FC = () => {
 
   const uploadForDiagnosis = async (imageFile: File) => {
     const url = `${API_BASE_URL}/api/disease/diagnose`;
-    addLog(`POST ${url} — file size: ${(imageFile.size / 1024).toFixed(1)}KB`);
+    addLog(`POST ${url} (${(imageFile.size / 1024).toFixed(1)}KB)`);
     try {
       const form = new FormData();
       form.append('file', imageFile);
@@ -152,11 +169,11 @@ const Disease: React.FC = () => {
       }
 
       const data: DiagnosisResult = await res.json();
-      addLog(`SUCCESS — disease: "${data.disease_name}", confidence: ${data.confidence}%`);
+      addLog(`✅ SUCCESS — "${data.disease_name}" confidence=${data.confidence}%`);
       setDiagnosis(data);
       setShowResult(true);
     } catch (err: any) {
-      addLog(`UPLOAD ERROR: ${err.message}`);
+      addLog(`❌ UPLOAD ERROR: ${err.message}`);
       setErrorMsg(err.message || 'Error diagnosing crop image. Please try again.');
     } finally {
       setIsScanning(false);
@@ -175,11 +192,35 @@ const Disease: React.FC = () => {
   const displayDiseaseName = diagnosis
     ? (lang === 'hi' || lang === 'hl' ? diagnosis.disease_name_hindi : diagnosis.disease_name)
     : '';
-
   const isHindi = lang === 'hi' || lang === 'hl';
 
   return (
     <div className="flex flex-col bg-[#fbf9f3] min-h-screen pb-[120px] font-sans text-[#1b1c18]">
+
+      {/*
+        Inputs are positioned OFF-SCREEN (not nested inside any overflow:hidden container).
+        This is critical: Android Chrome cannot deliver a file back to an input that is
+        clipped by overflow:hidden. We use htmlFor on labels to associate them.
+      */}
+      <input
+        ref={cameraInputRef}
+        id="km-camera-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        disabled={isScanning}
+        onChange={(e) => handleFileChange(e, 'camera')}
+        style={{ position: 'fixed', left: '-9999px', top: 0, width: '1px', height: '1px', opacity: 0 }}
+      />
+      <input
+        ref={galleryInputRef}
+        id="km-gallery-input"
+        type="file"
+        accept="image/*"
+        disabled={isScanning}
+        onChange={(e) => handleFileChange(e, 'gallery')}
+        style={{ position: 'fixed', left: '-9999px', top: 0, width: '1px', height: '1px', opacity: 0 }}
+      />
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div className="h-[56px] border-b border-[#eae8e2] bg-white px-4 flex items-center justify-between shrink-0 sticky top-0 z-40">
@@ -251,48 +292,33 @@ const Disease: React.FC = () => {
           <div className="flex flex-col gap-3.5 w-full max-w-[340px]">
 
             {/*
-              CAMERA BUTTON — uses <label> wrapping a real <input capture="environment">.
-              This is the only approach that reliably opens the native camera on Android Chrome
-              without being blocked by programmatic-click security restrictions.
-              The input is absolutely positioned, fully transparent, and covers the label area.
+              CAMERA — label uses htmlFor to activate the off-screen input.
+              NOT overflow:hidden so Android can deliver the file back after capture.
             */}
             <label
-              className={`relative w-full h-[52px] bg-[#005129] hover:bg-[#1a6b3c] active:scale-[0.98] text-white rounded-[14px] font-bold flex items-center justify-center gap-2.5 transition-all shadow-md text-[15px] select-none overflow-hidden ${isScanning ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}
+              htmlFor="km-camera-input"
+              className={`w-full h-[52px] bg-[#005129] hover:bg-[#1a6b3c] active:scale-[0.98] text-white rounded-[14px] font-bold flex items-center justify-center gap-2.5 transition-all shadow-md text-[15px] select-none ${isScanning ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}
               onClick={() => {
-                addLog('Camera label tapped — opening native camera...');
+                addLog('📷 Camera label tapped — activating input via htmlFor...');
                 logEnvironment();
+                if (cameraInputRef.current) cameraInputRef.current.value = '';
               }}
             >
               <Camera size={20} />
               {isHindi ? 'कैमरा से फोटो लें 📸' : 'Take Photo with Camera 📸'}
-              {!isScanning && (
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={(e) => handleFileChange(e, 'camera')}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              )}
             </label>
 
-            {/* GALLERY BUTTON — same label pattern, no capture attribute */}
+            {/* GALLERY */}
             <label
-              className={`relative w-full h-[48px] border-2 border-[#005129] bg-white hover:bg-[#f0faf4] active:scale-[0.98] text-[#005129] rounded-[14px] font-bold flex items-center justify-center gap-2.5 transition-all text-[14px] select-none overflow-hidden ${isScanning ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}
-              onClick={() => addLog('Gallery label tapped.')}
+              htmlFor="km-gallery-input"
+              className={`w-full h-[48px] border-2 border-[#005129] bg-white hover:bg-[#f0faf4] active:scale-[0.98] text-[#005129] rounded-[14px] font-bold flex items-center justify-center gap-2.5 transition-all text-[14px] select-none ${isScanning ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}
+              onClick={() => {
+                addLog('🖼 Gallery label tapped.');
+                if (galleryInputRef.current) galleryInputRef.current.value = '';
+              }}
             >
               <Upload size={17} />
               {isHindi ? 'गैलरी से चुनें' : 'Choose from Gallery'}
-              {!isScanning && (
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(e, 'gallery')}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              )}
             </label>
 
             <p className="text-[11px] text-gray-400 text-center leading-relaxed">
@@ -368,7 +394,7 @@ const Disease: React.FC = () => {
           {showDebug ? '🛠️ Hide Debug Logs' : '🛠️ Show Debug Logs'}
         </button>
         {showDebug && (
-          <div className="mt-2 p-3 bg-gray-900 text-green-400 font-mono text-[10px] rounded-lg h-[180px] overflow-y-auto border border-gray-700">
+          <div className="mt-2 p-3 bg-gray-900 text-green-400 font-mono text-[10px] rounded-lg h-[200px] overflow-y-auto border border-gray-700">
             {debugLogs.length === 0 ? (
               <span className="text-gray-500">No logs yet. Tap Camera or Gallery to start.</span>
             ) : (
