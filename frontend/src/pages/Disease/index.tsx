@@ -63,6 +63,11 @@ const Disease: React.FC = () => {
     try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
   };
 
+  // Log on mount to confirm new code version is running
+  useEffect(() => {
+    addLog('🚀 Disease page mounted — build v3 (display:none inputs)');
+  }, []);
+
   // Detect when user returns from camera app — fires even if file delivery failed
   useEffect(() => {
     const onFocus = () => addLog('▶ Window regained focus (returned from camera/gallery)');
@@ -215,6 +220,8 @@ const Disease: React.FC = () => {
         This is critical: Android Chrome cannot deliver a file back to an input that is
         clipped by overflow:hidden. We use htmlFor on labels to associate them.
       */}
+      {/* display:none is the standard pattern (used by Bootstrap/MUI/Ant Design).
+          The browser can still deliver files to display:none inputs via label association. */}
       <input
         ref={cameraInputRef}
         id="km-camera-input"
@@ -223,7 +230,7 @@ const Disease: React.FC = () => {
         capture="environment"
         disabled={isScanning}
         onChange={(e) => handleFileChange(e, 'camera')}
-        style={{ position: 'fixed', left: '-9999px', top: 0, width: '1px', height: '1px', opacity: 0 }}
+        style={{ display: 'none' }}
       />
       <input
         ref={galleryInputRef}
@@ -232,7 +239,7 @@ const Disease: React.FC = () => {
         accept="image/*"
         disabled={isScanning}
         onChange={(e) => handleFileChange(e, 'gallery')}
-        style={{ position: 'fixed', left: '-9999px', top: 0, width: '1px', height: '1px', opacity: 0 }}
+        style={{ display: 'none' }}
       />
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
